@@ -18,7 +18,7 @@
         .btn-save { background: var(--primary); color: white; width: 100%; padding: 18px; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; display: none; transition: 0.3s; }
         .btn-save:disabled { background: #ccc; cursor: not-allowed; }
         #status { margin-top: 20px; color: #555; font-size: 14px; line-height: 1.6; }
-        .success-msg { color: #2a9d8f; font-weight: bold; }
+        .success-box { background: #e9f5f2; color: #2a9d8f; padding: 15px; border-radius: 10px; border: 1px solid #2a9d8f; margin-top: 15px; }
     </style>
 </head>
 <body>
@@ -44,13 +44,12 @@
 
 <script>
     // ==========================================
-    // إعدادات الربط - استبدل القيم هنا بدقة
+    // إعدادات الربط النهائية
     // ==========================================
     const CLOUD_NAME = "mediaflows_63e9d71e-1d55-4d86-a638-15769a0309b4";
     const UPLOAD_PRESET = "joy_gym_preset"; 
-    const APPS_SCRIPT_URL = "ضع_رابط_الـ_EXEC_هنا"; 
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwVRvf1vtRECKWUHEomGpPy1TN3ixrs7ElLw0I325qxC63KaSV6n6MLcoRL3Rn-x62UhA/exec"; 
 
-    // إعداد أداة القص
     let croppieInstance = new Croppie(document.getElementById('upload-demo'), {
         viewport: { width: 220, height: 220, type: 'circle' },
         boundary: { width: 300, height: 300 },
@@ -58,7 +57,6 @@
         enableOrientation: true
     });
 
-    // معالجة اختيار الصورة
     document.getElementById('imageInput').onchange = function() {
         const reader = new FileReader();
         reader.onload = function(e) {
@@ -69,7 +67,6 @@
         reader.readAsDataURL(this.files[0]);
     };
 
-    // الوظيفة الأساسية
     async function processRegistration() {
         const name = document.getElementById('userName').value;
         const status = document.getElementById('status');
@@ -81,12 +78,11 @@
         status.innerHTML = "⏳ جاري ضغط الصورة ورفعها لسحابة Cloudinary...";
 
         try {
-            // 1. استخراج الصورة من أداة القص بصيغة Blob
+            // 1. استخراج الصورة المقصوصة
             const blob = await croppieInstance.result({
                 type: 'blob',
                 size: { width: 400, height: 400 },
-                format: 'jpeg',
-                circle: false // نأخذها مربعة لسهولة العرض في الجدول
+                format: 'jpeg'
             });
 
             // 2. الرفع لـ Cloudinary
@@ -103,14 +99,13 @@
             if (!cloudData.secure_url) throw new Error("فشل الرفع لمستودع الصور");
             const imageUrl = cloudData.secure_url;
 
-            status.innerHTML = "✅ تم رفع الصورة بنجاح!<br>⏳ جاري إرسال البيانات لجدول جوجل...";
+            status.innerHTML = "✅ تم رفع الصورة!<br>⏳ جاري إرسال البيانات لجدول جوجل...";
 
             // 3. إرسال البيانات للجسر (App Script)
-            // ملاحظة: نستخدم mode: 'no-cors' لتجنب مشاكل المتصفح الأمنية
+            // ملاحظة: نستخدم mode: 'no-cors' للتوافق مع قيود Google Apps Script
             await fetch(APPS_SCRIPT_URL, {
                 method: 'POST',
                 mode: 'no-cors',
-                cache: 'no-cache',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     name: name,
@@ -118,11 +113,11 @@
                 })
             });
 
-            status.innerHTML = "<span class='success-msg'>🎉 مبروك! تم تسجيل المشترك وحفظ بياناته بنجاح في الجدول.</span>";
+            status.innerHTML = "<div class='success-box'>🎉 مبروك! تم تسجيل " + name + " وحفظ بياناته بنجاح في الجدول.</div>";
             alert("تمت العملية بنجاح!");
             
-            // إعادة تعيين الواجهة
-            setTimeout(() => location.reload(), 3000);
+            // إعادة التصفير بعد 4 ثوانٍ
+            setTimeout(() => location.reload(), 4000);
 
         } catch (error) {
             console.error(error);

@@ -10,10 +10,13 @@
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--light); display: flex; justify-content: center; padding: 20px; margin: 0; }
         .app-container { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 450px; text-align: center; }
         h2 { color: var(--primary); margin-bottom: 20px; font-size: 24px; }
-        input[type="text"] { width: 100%; padding: 15px; margin-bottom: 15px; border: 2px solid #eee; border-radius: 12px; font-size: 16px; box-sizing: border-box; outline: none; }
-        .upload-zone { border: 2px dashed var(--primary); padding: 20px; border-radius: 12px; cursor: pointer; color: var(--primary); font-weight: bold; margin-bottom: 15px; background: #f9f9f9; }
-        #upload-demo { display: none; height: 320px; margin-bottom: 20px; }
-        .btn-save { background: var(--primary); color: white; width: 100%; padding: 18px; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; display: none; }
+        input[type="text"] { width: 100%; padding: 15px; margin-bottom: 15px; border: 2px solid #eee; border-radius: 12px; font-size: 16px; box-sizing: border-box; outline: none; transition: 0.3s; }
+        input[type="text"]:focus { border-color: var(--primary); }
+        .upload-zone { border: 2px dashed var(--primary); padding: 20px; border-radius: 12px; cursor: pointer; color: var(--primary); font-weight: bold; margin-bottom: 15px; background: #f9f9f9; transition: 0.3s; }
+        .upload-zone:hover { background: #f0fdfa; }
+        #upload-demo { display: none; height: 320px; margin-bottom: 20px; background: #fff; border-radius: 12px; overflow: hidden; }
+        .btn-save { background: var(--primary); color: white; width: 100%; padding: 18px; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; display: none; transition: 0.3s; }
+        .btn-save:disabled { background: #ccc; cursor: not-allowed; }
         #status { margin-top: 20px; color: #555; font-size: 14px; line-height: 1.6; }
         .success-box { background: #e9f5f2; color: #2a9d8f; padding: 15px; border-radius: 10px; border: 1px solid #2a9d8f; margin-top: 15px; }
     </style>
@@ -22,24 +25,32 @@
 
 <div class="app-container">
     <h2>📸 تسجيل مشترك جديد</h2>
+    
     <input type="text" id="userName" placeholder="اسم المشترك الرباعي">
+    
     <div class="upload-zone" onclick="document.getElementById('imageInput').click()">
         <span>📷 التقط أو اختر صورة الشخصية</span>
         <input type="file" id="imageInput" accept="image/*" style="display:none">
     </div>
+
     <div id="upload-demo"></div>
+    
     <button id="saveBtn" class="btn-save" onclick="processRegistration()">حفظ البيانات وإصدار الهوية</button>
+    
     <div id="status"></div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/croppie/2.6.5/croppie.min.js"></script>
 
 <script>
-    // --- البيانات التي زودتني بها ---
+    // ==========================================
+    // الإعدادات المعتمدة والنهائية
+    // ==========================================
     const CLOUD_NAME = "mediaflows_63e9d71e-1d55-4d86-a638-15769a0309b4";
     const UPLOAD_PRESET = "joy_gym_preset"; 
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwVRvf1vtRECKWUHEomGpPy1TN3ixrs7ElLw0I325qxC63KaSV6n6MLcoRL3Rn-x62UhA/exec"; 
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw7SoCr5eZQgaK0cwLw-SiicVMxhQhw44iAzsMTcxTXMcgYE2o-f9Ez0vwQp67kUWgJvQ/exec"; 
 
+    // تهيئة أداة قص الصور
     let croppieInstance = new Croppie(document.getElementById('upload-demo'), {
         viewport: { width: 220, height: 220, type: 'circle' },
         boundary: { width: 300, height: 300 },
@@ -47,6 +58,7 @@
         enableOrientation: true
     });
 
+    // معالجة اختيار الصورة
     document.getElementById('imageInput').onchange = function() {
         const reader = new FileReader();
         reader.onload = function(e) {
@@ -57,43 +69,65 @@
         reader.readAsDataURL(this.files[0]);
     };
 
+    // عملية التسجيل الكاملة
     async function processRegistration() {
         const name = document.getElementById('userName').value;
         const status = document.getElementById('status');
         const saveBtn = document.getElementById('saveBtn');
 
-        if (!name) { alert("أدخل اسم المشترك أولاً"); return; }
+        if (!name) { alert("من فضلك أدخل اسم المشترك أولاً"); return; }
         
         saveBtn.disabled = true;
-        status.innerHTML = "⏳ جاري ضغط الصورة ورفعها لسحابة Cloudinary...";
+        status.innerHTML = "⏳ جاري ضغط الصورة ورفعها للسحابة...";
 
         try {
-            const blob = await croppieInstance.result({ type: 'blob', size: { width: 400, height: 400 }, format: 'jpeg' });
+            // 1. معالجة الصورة
+            const blob = await croppieInstance.result({
+                type: 'blob',
+                size: { width: 400, height: 400 },
+                format: 'jpeg'
+            });
+
+            // 2. الرفع لـ Cloudinary
             const formData = new FormData();
             formData.append('file', blob);
             formData.append('upload_preset', UPLOAD_PRESET);
 
-            const cloudRes = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: 'POST', body: formData });
+            const cloudRes = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+                method: 'POST',
+                body: formData
+            });
             const cloudData = await cloudRes.json();
+            
+            if (!cloudData.secure_url) throw new Error("فشل الرفع لمستودع الصور");
             const imageUrl = cloudData.secure_url;
 
-            status.innerHTML = "✅ تم رفع الصورة!<br>⏳ جاري إرسال البيانات لجدول جوجل...";
+            status.innerHTML = "✅ تم رفع الصورة بنجاح!<br>⏳ جاري إرسال البيانات لجدول جوجل...";
 
+            // 3. إرسال البيانات لـ Google Sheets
             await fetch(APPS_SCRIPT_URL, {
                 method: 'POST',
-                mode: 'no-cors',
-                body: JSON.stringify({ name: name, imageUrl: imageUrl })
+                mode: 'no-cors', // لضمان تجاوز قيود المتصفح
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: name,
+                    imageUrl: imageUrl
+                })
             });
 
-            status.innerHTML = "<div class='success-box'>🎉 تم تسجيل المشترك بنجاح في الجدول.</div>";
+            status.innerHTML = "<div class='success-box'>🎉 مبروك! تم تسجيل " + name + " بنجاح في النظام.</div>";
             alert("تمت العملية بنجاح!");
-            setTimeout(() => location.reload(), 3000);
+            
+            // إعادة تصفير التطبيق بعد نجاح العملية
+            setTimeout(() => location.reload(), 4000);
 
         } catch (error) {
-            status.innerHTML = "❌ خطأ: " + error.message;
+            console.error(error);
+            status.innerHTML = "❌ حدث خطأ: " + error.message;
             saveBtn.disabled = false;
         }
     }
 </script>
+
 </body>
 </html>

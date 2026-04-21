@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل مشتركين - Joy Gym</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #27ae60;
+            --bg-color: #f4f7f6;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        h2 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: #555;
+        }
+
+        input[type="text"], input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--accent-color);
+            outline: none;
+        }
+
+        #preview {
+            width: 100%;
+            height: 200px;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            margin: 1rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background-color: #fafafa;
+        }
+
+        #preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.1s;
+        }
+
+        button:hover {
+            background-color: #219150;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .status {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🏋️‍♂️ مشترك جديد - Joy Gym</h2>
+    
+    <div class="form-group">
+        <label for="memberName">اسم المشترك الثلاثي</label>
+        <input type="text" id="memberName" placeholder="مثال: محمد أحمد علي" required>
+    </div>
+
+    <div class="form-group">
+        <label for="imageUpload">صورة الهوية أو الشخصية</label>
+        <input type="file" id="imageUpload" accept="image/*" onchange="previewImage(event)" required>
+    </div>
+
+    <div id="preview">
+        <span style="color: #aaa;">معاينة الصورة ستظهر هنا</span>
+    </div>
+
+    <button onclick="saveToGoogle()" id="submitBtn">حفظ البيانات في السحاب</button>
+    <div id="statusMessage" class="status"></div>
+</div>
+
+<script>
+    // --- إعدادات الرابط (تأكد من تحديث الرابط الخاص بك هنا) ---
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxRwUNGHpHEtZccsMw3hDB0zYpx6ldMc2_pSWVVHqoikwjt3NPm4lIOmG1ex1nwCd8MPA/exec";
+
+    // وظيفة معاينة الصورة قبل الرفع
+    function previewImage(event) {
+        const previewContainer = document.getElementById('preview');
+        const file = event.target.files[0];
+        
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewContainer.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // وظيفة تحويل الصورة لـ Base64 والإرسال
+    async function saveToGoogle() {
+        const nameInput = document.getElementById('memberName');
+        const fileInput = document.getElementById('imageUpload');
+        const submitBtn = document.getElementById('submitBtn');
+        const statusMsg = document.getElementById('statusMessage');
+
+        if (!nameInput.value || !fileInput.files[0]) {
+            alert("⚠️ يرجى تعبئة كافة البيانات واختيار صورة.");
+            return;
+        }
+
+        // تحديث حالة الزر
+        submitBtn.disabled = true;
+        submitBtn.innerText = "جاري الحفظ...";
+        statusMsg.innerText = "⏳ جاري تشفير الصورة وإرسال البيانات...";
+
+        const reader = new FileReader();
+        reader.readAsDataURL(fileInput.files[0]);
+        
+        reader.onload = async () => {
+            const base64Image = reader.result; // يحتوي على الـ Data URL بالكامل
+
+            try {
+                // إرسال البيانات باستخدام fetch
+                await fetch(GOOGLE_SCRIPT_URL, {
+                    method: "POST",
+                    mode: "no-cors", // لتجنب مشاكل الـ CORS مع جوجل
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        name: nameInput.value,
+                        image: base64Image
+                    })
+                });
+
+                // رسالة النجاح
+                alert("✅ تم الإرسال بنجاح! تحقق من جدول البيانات.");
+                nameInput.value = "";
+                fileInput.value = "";
+                document.getElementById('preview').innerHTML = '<span style="color: #aaa;">معاينة الصورة ستظهر هنا</span>';
+                statusMsg.innerText = "✅ اكتملت العملية.";
+                
+            } catch (error) {
+                console.error("Error:", error);
+                alert("❌ حدث خطأ في الاتصال بالسيرفر.");
+                statusMsg.innerText = "❌ فشل الإرسال.";
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerText = "حفظ البيانات في السحاب";
+            }
+        };
+    }
+</script>
+
+</body>
+</html>

@@ -132,12 +132,12 @@
 
 <script>
     // --- إعدادات الرابط (تأكد من تحديث الرابط الخاص بك هنا) ---
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzR8D__4Jy8q3Q0CqvzA9AFW8L2qjC2p_gcFIuCUIYATSwFIfJPEQlEBZUNYHagk3NoKA/exec";
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx9lvwuiXefAZDuUnolKAdqqSupDPNLszeva4vqsCUGYYnpuVSgSBtXNi5I9Jww4h-Yfg/exec"
 
     // وظيفة معاينة الصورة قبل الرفع
     function previewImage(event) {
         const previewContainer = document.getElementById('preview');
-        const file = event.target.files[0];
+        const file = event.target.files[0]
         
         if (file) {
             const reader = new FileReader();

@@ -54,7 +54,7 @@
 </div>
 
 <script>
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbxWi_bhBRIXpFSjKyQg60P4P9FawsV5yscmfEBCJMSdKgTDtooWUMQTFV0EEWO1cmFOQQ/exec';
+    const scriptURL = 'hhttps://script.google.com/macros/s/AKfycbxGkoZGw1RIxRnNjV6QW9uLfgCSUbPrBXgHVGhlyn4c1Ox9EGnEFVGkkZlmEluUTfD06w/exec';
 
     document.getElementById('submitBtn').addEventListener('click', function() {
         const name = document.getElementById('userName').value;
@@ -78,11 +78,17 @@
             })
             .then(res => res.json())
             .then(result => {
-                if (result.result === "success") {
-                    // تعبئة بيانات الهوية
-                    document.getElementById('display-name').innerText = result.name;
-                    document.getElementById('display-id').innerText = result.id;
-                    document.getElementById('display-date').innerText = result.date;
+                .then(result => {
+    if (result.result === "success") {
+        document.getElementById('display-name').innerText = result.name;
+        document.getElementById('display-id').innerText = result.id;
+        document.getElementById('display-date').innerText = result.date;
+        // الروابط الآن تأتي جاهزة من السكربت المحدث
+        document.getElementById('display-image').src = result.imageUrl;
+        document.getElementById('display-qr').src = result.qrUrl;
+        document.getElementById('id-card-result').style.display = 'block';
+    }
+})
                     // تحويل رابط درايف إلى رابط عرض مباشر
 let directUrl = result.imageUrl.replace('/view?usp=drivesdk', '').replace('file/d/', 'uc?export=view&id=');
 document.getElementById('display-image').src = directUrl;

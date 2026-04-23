@@ -19,6 +19,18 @@
         .qr-img { width: 80px; height: 80px; margin-top: 10px; }
         .info { margin-top: 10px; font-size: 16px; }
         .info b { color: #555; }
+        #display-image {
+    width: 100px;
+    height: 100px;
+    object-fit: cover; /* لضمان عدم تمدد الصورة بشكل سيء */
+    display: block;
+}
+
+#display-qr {
+    width: 70px;
+    height: 70px;
+    display: block;
+}
     </style>
 </head>
 <body>
@@ -71,8 +83,10 @@
                     document.getElementById('display-name').innerText = result.name;
                     document.getElementById('display-id').innerText = result.id;
                     document.getElementById('display-date').innerText = result.date;
-                    document.getElementById('display-image').src = result.imageUrl;
-                    document.getElementById('display-qr').src = result.qrUrl;
+                    // تحويل رابط درايف إلى رابط عرض مباشر
+let directUrl = result.imageUrl.replace('/view?usp=drivesdk', '').replace('file/d/', 'uc?export=view&id=');
+document.getElementById('display-image').src = directUrl;
+document.getElementById('display-qr').src = result.qrUrl;
 
                     // إظهار الهوية
                     document.getElementById('id-card-result').style.display = 'block';

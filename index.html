@@ -8,19 +8,20 @@
     <link rel="stylesheet" href="hhttps://script.google.com/macros/s/AKfycbx7zxuBx8uNovjMRTDGYFlkDbDar4zga8WGilaVR98aJXJboCEvCdt1QoTqg9j2s6Iyuw/exec">
     <style>
         :root { --main-color: #f7b500; --dark-color: #1a1a1a; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f2f5; padding: 20px; text-align: center; direction: rtl; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; text-align: center; }
         .container { max-width: 450px; background: white; padding: 20px; margin: auto; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-        input, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; font-size: 16px; }
-        button { background: var(--main-color); color: var(--dark-color); font-weight: bold; border: none; cursor: pointer; }
-        button:disabled { background: #ccc; cursor: not-allowed; }
-        #upload-demo { width: 100%; height: 300px; margin: 15px 0; display: none; background: #eee; }
+        input, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; }
+        button { background: var(--main-color); color: var(--dark-color); font-weight: bold; border: none; cursor: pointer; height: 50px; }
+        button:disabled { background: #ccc; cursor: wait; }
+        
+        /* تحسين منطقة القص لتناسب الجوال والكمبيوتر */
+        #upload-demo { width: 100%; height: 350px; margin: 15px 0; display: none; border: 1px solid #ccc; background: #fafafa; }
         
         .id-card { display: none; width: 350px; margin: 20px auto; background: white; border-radius: 15px; border: 2px solid var(--dark-color); overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
         .card-header { background: var(--dark-color); color: var(--main-color); padding: 15px; font-weight: bold; font-size: 20px; }
         .card-body { padding: 20px; display: flex; align-items: center; text-align: right; }
         .user-photo { width: 100px; height: 100px; border-radius: 10px; border: 3px solid var(--main-color); object-fit: cover; margin-left: 20px; }
         .info { flex: 1; }
-        .info div { margin-bottom: 8px; font-size: 14px; }
         .qr-img { width: 70px; height: 70px; margin-top: 10px; }
     </style>
 </head>
@@ -51,75 +52,64 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/croppie/2.6.5/croppie.min.js"></script>
 
 <script>
-    // ⚠️ استبدل هذا الرابط برابط السكربت الجديد الخاص بك
-    const scriptURL = 'رابط_السكربت_الخاص_بك_هنا';
+    // ⚠️ استبدل الرابط أدناه برابط السكربت (Exec URL)
+    const scriptURL = 'ضع_هنا_رابط_السكربت_الجديد';
 
-    var $uploadCrop;
+    var $uploadCrop = $('#upload-demo').croppie({
+        viewport: { width: 200, height: 200, type: 'square' },
+        boundary: { width: 300, height: 300 },
+        showZoomer: true,
+        enableExif: true,
+        enforceBoundary: false // يسمح بالتحكم الأسهل في الصور الكبيرة
+    });
 
-    $(document).ready(function() {
-        // تهيئة أداة القص
-        $uploadCrop = $('#upload-demo').croppie({
-            viewport: { width: 200, height: 200, type: 'square' },
-            boundary: { width: 300, height: 300 },
-            showZoomer: true
-        });
-
-        // عند اختيار ملف
-        $('#upload').on('change', function () { 
-            if (this.files && this.files[0]) {
-                var reader = new FileReader();
-                reader.onload = function (e) {
-                    $('#upload-demo').show();
-                    $uploadCrop.croppie('bind', {
-                        url: e.target.result
-                    });
-                }
-                reader.readAsDataURL(this.files[0]);
+    $('#upload').on('change', function () { 
+        if (this.files && this.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                $('#upload-demo').show();
+                $uploadCrop.croppie('bind', { url: e.target.result });
             }
-        });
+            reader.readAsDataURL(this.files[0]);
+        }
+    });
 
-        // عند الضغط على الزر
-        $('#submitBtn').on('click', function() {
-            const name = $('#userName').val();
-            if(!name) { alert("يرجى كتابة الاسم!"); return; }
+    $('#submitBtn').on('click', function() {
+        const name = $('#userName').val();
+        if(!name) return alert("يرجى كتابة الاسم!");
 
-            const btn = $(this);
-            btn.attr('disabled', true).text('جاري المعالجة...');
+        const btn = $(this);
+        btn.prop('disabled', true).text('جاري المعالجة والرفع...');
 
-            // تنفيذ عملية القص برمجياً
-            $uploadCrop.croppie('result', {
-                type: 'base64',
-                size: { width: 400, height: 400 },
-                format: 'jpeg',
-                quality: 0.8
-            }).then(function (base64Img) {
-                
-                fetch(scriptURL, {
-                    method: 'POST',
-                    body: JSON.stringify({ name: name, image: base64Img })
-                })
-                .then(res => res.json())
-                .then(result => {
-                    if(result.result === "success") {
-                        $('#display-name').text(result.name);
-                        $('#display-id').text(result.id);
-                        $('#display-date').text(result.date);
-                        $('#display-image').attr('src', result.imageUrl);
-                        $('#display-qr').attr('src', result.qrUrl);
-                        
-                        $('#id-card-result').fadeIn();
-                        btn.attr('disabled', false).text('قص وإصدار الهوية');
-                        alert("تم بنجاح!");
-                    }
-                })
-                .catch(err => {
-                    alert("خطأ في الاتصال بالسيرفر. تأكد من الرابط.");
-                    btn.attr('disabled', false).text('إعادة المحاولة');
-                });
+        $uploadCrop.croppie('result', {
+            type: 'base64',
+            size: { width: 400, height: 400 },
+            format: 'jpeg',
+            quality: 0.8
+        }).then(function (base64Img) {
+            fetch(scriptURL, {
+                method: 'POST',
+                body: JSON.stringify({ name: name, image: base64Img })
+            })
+            .then(res => res.json())
+            .then(result => {
+                if(result.result === "success") {
+                    $('#display-name').text(result.name);
+                    $('#display-id').text(result.id);
+                    $('#display-date').text(result.date);
+                    $('#display-image').attr('src', result.imageUrl);
+                    $('#display-qr').attr('src', result.qrUrl);
+                    $('#id-card-result').show();
+                    btn.prop('disabled', false).text('قص وإصدار الهوية');
+                    alert("تم بنجاح!");
+                }
+            })
+            .catch(err => {
+                alert("فشل الرفع، تأكد من إعدادات السكربت");
+                btn.prop('disabled', false).text('إعادة المحاولة');
             });
         });
     });
 </script>
-
 </body>
 </html>

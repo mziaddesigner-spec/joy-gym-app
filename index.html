@@ -3,26 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>إصدار هويات Joy Gym</title>
-    
-    <link rel="stylesheet" href="hhttps://script.google.com/macros/s/AKfycbx7zxuBx8uNovjMRTDGYFlkDbDar4zga8WGilaVR98aJXJboCEvCdt1QoTqg9j2s6Iyuw/exec">
+    <title>نظام هويات Joy Gym</title>
     <style>
         :root { --main-color: #f7b500; --dark-color: #1a1a1a; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; text-align: center; }
-        .container { max-width: 450px; background: white; padding: 20px; margin: auto; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-        input, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; }
-        button { background: var(--main-color); color: var(--dark-color); font-weight: bold; border: none; cursor: pointer; height: 50px; }
-        button:disabled { background: #ccc; cursor: wait; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f2f5; margin: 0; padding: 10px; text-align: center; }
+        .container { max-width: 400px; background: white; padding: 20px; margin: 10px auto; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        input, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; }
+        button { background: var(--main-color); color: var(--dark-color); font-weight: bold; border: none; cursor: pointer; height: 50px; font-size: 16px; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
         
-        /* تحسين منطقة القص لتناسب الجوال والكمبيوتر */
-        #upload-demo { width: 100%; height: 350px; margin: 15px 0; display: none; border: 1px solid #ccc; background: #fafafa; }
-        
-        .id-card { display: none; width: 350px; margin: 20px auto; background: white; border-radius: 15px; border: 2px solid var(--dark-color); overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
-        .card-header { background: var(--dark-color); color: var(--main-color); padding: 15px; font-weight: bold; font-size: 20px; }
-        .card-body { padding: 20px; display: flex; align-items: center; text-align: right; }
-        .user-photo { width: 100px; height: 100px; border-radius: 10px; border: 3px solid var(--main-color); object-fit: cover; margin-left: 20px; }
+        /* معاينة الصورة المختارة قبل الرفع */
+        #preview-container { margin: 10px 0; display: none; }
+        #image-preview { width: 150px; height: 150px; object-fit: cover; border-radius: 10px; border: 2px solid var(--main-color); }
+
+        /* تصميم الهوية النهائي */
+        .id-card { display: none; width: 340px; margin: 20px auto; background: white; border-radius: 12px; border: 2px solid var(--dark-color); overflow: hidden; box-shadow: 0 8px 25px rgba(0,0,0,0.2); }
+        .card-header { background: var(--dark-color); color: var(--main-color); padding: 12px; font-weight: bold; font-size: 18px; }
+        .card-body { padding: 15px; display: flex; align-items: center; text-align: right; }
+        .user-photo { width: 90px; height: 90px; border-radius: 8px; border: 2px solid var(--main-color); object-fit: cover; margin-left: 15px; }
         .info { flex: 1; }
-        .qr-img { width: 70px; height: 70px; margin-top: 10px; }
+        .info div { margin-bottom: 5px; font-size: 13px; }
+        .qr-img { width: 60px; height: 60px; margin-top: 5px; }
     </style>
 </head>
 <body>
@@ -31,8 +32,13 @@
     <h2>تسجيل مشترك جديد</h2>
     <input type="text" id="userName" placeholder="اسم المشترك">
     <input type="file" id="upload" accept="image/*">
-    <div id="upload-demo"></div>
-    <button id="submitBtn">قص وإصدار الهوية</button>
+    
+    <div id="preview-container">
+        <p style="font-size: 12px; color: #666;">معاينة الصورة:</p>
+        <img id="image-preview" src="">
+    </div>
+    
+    <button id="submitBtn">إصدار الهوية فوراً</button>
 </div>
 
 <div id="id-card-result" class="id-card">
@@ -40,7 +46,7 @@
     <div class="card-body">
         <img id="display-image" class="user-photo" src="">
         <div class="info">
-            <div style="font-weight: bold; font-size: 18px;" id="display-name"></div>
+            <div style="font-weight: bold; font-size: 16px;" id="display-name"></div>
             <div>رقم الاشتراك: <span id="display-id" style="color: red; font-weight: bold;"></span></div>
             <div>تاريخ الإصدار: <span id="display-date"></span></div>
             <img id="display-qr" class="qr-img" src="">
@@ -48,68 +54,58 @@
     </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/croppie/2.6.5/croppie.min.js"></script>
+<script src="hhttps://script.google.com/macros/s/AKfycbx7zxuBx8uNovjMRTDGYFlkDbDar4zga8WGilaVR98aJXJboCEvCdt1QoTqg9j2s6Iyuw/exec"></script>
 
 <script>
-    // ⚠️ استبدل الرابط أدناه برابط السكربت (Exec URL)
-    const scriptURL = 'ضع_هنا_رابط_السكربت_الجديد';
+    // ⚠️ استبدل الرابط أدناه برابط السكربت (Exec URL) الجديد
+    const scriptURL = 'رابط_السكربت_الخاص_بك_هنا';
+    let base64Image = "";
 
-    var $uploadCrop = $('#upload-demo').croppie({
-        viewport: { width: 200, height: 200, type: 'square' },
-        boundary: { width: 300, height: 300 },
-        showZoomer: true,
-        enableExif: true,
-        enforceBoundary: false // يسمح بالتحكم الأسهل في الصور الكبيرة
-    });
-
-    $('#upload').on('change', function () { 
-        if (this.files && this.files[0]) {
-            var reader = new FileReader();
-            reader.onload = function (e) {
-                $('#upload-demo').show();
-                $uploadCrop.croppie('bind', { url: e.target.result });
+    // عرض معاينة الصورة فور اختيارها
+    $('#upload').on('change', function() {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                $('#image-preview').attr('src', e.target.result);
+                $('#preview-container').show();
+                base64Image = e.target.result; // حفظ الصورة لتحميلها
             }
-            reader.readAsDataURL(this.files[0]);
+            reader.readAsDataURL(file);
         }
     });
 
     $('#submitBtn').on('click', function() {
         const name = $('#userName').val();
-        if(!name) return alert("يرجى كتابة الاسم!");
+        if(!name || !base64Image) return alert("يرجى إدخال الاسم واختيار صورة!");
 
         const btn = $(this);
-        btn.prop('disabled', true).text('جاري المعالجة والرفع...');
+        btn.prop('disabled', true).text('جاري الرفع للحساب...');
 
-        $uploadCrop.croppie('result', {
-            type: 'base64',
-            size: { width: 400, height: 400 },
-            format: 'jpeg',
-            quality: 0.8
-        }).then(function (base64Img) {
-            fetch(scriptURL, {
-                method: 'POST',
-                body: JSON.stringify({ name: name, image: base64Img })
-            })
-            .then(res => res.json())
-            .then(result => {
-                if(result.result === "success") {
-                    $('#display-name').text(result.name);
-                    $('#display-id').text(result.id);
-                    $('#display-date').text(result.date);
-                    $('#display-image').attr('src', result.imageUrl);
-                    $('#display-qr').attr('src', result.qrUrl);
-                    $('#id-card-result').show();
-                    btn.prop('disabled', false).text('قص وإصدار الهوية');
-                    alert("تم بنجاح!");
-                }
-            })
-            .catch(err => {
-                alert("فشل الرفع، تأكد من إعدادات السكربت");
-                btn.prop('disabled', false).text('إعادة المحاولة');
-            });
+        fetch(scriptURL, {
+            method: 'POST',
+            body: JSON.stringify({ name: name, image: base64Image })
+        })
+        .then(res => res.json())
+        .then(result => {
+            if(result.result === "success") {
+                $('#display-name').text(result.name);
+                $('#display-id').text(result.id);
+                $('#display-date').text(result.date);
+                $('#display-image').attr('src', result.imageUrl);
+                $('#display-qr').attr('src', result.qrUrl);
+                
+                $('#id-card-result').fadeIn();
+                btn.prop('disabled', false).text('إصدار هوية أخرى');
+                alert("تم تسجيل المشترك بنجاح!");
+            }
+        })
+        .catch(err => {
+            alert("حدث خطأ في الاتصال. تأكد من إعدادات جوجل سكربت.");
+            btn.prop('disabled', false).text('إعادة المحاولة');
         });
     });
 </script>
+
 </body>
 </html>

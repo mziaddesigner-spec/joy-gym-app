@@ -3,65 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام هويات Joy Gym</title>
+    <title>إصدار هويات Joy Gym</title>
     <style>
         :root { --main-color: #f7b500; --dark-color: #1a1a1a; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f2f5; margin: 0; padding: 10px; text-align: center; }
-        .container { max-width: 400px; background: white; padding: 20px; margin: 10px auto; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        input, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; }
-        button { background: var(--main-color); color: var(--dark-color); font-weight: bold; border: none; cursor: pointer; height: 50px; font-size: 16px; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f2f5; margin: 0; padding: 15px; text-align: center; }
+        .container { max-width: 400px; background: white; padding: 20px; margin: auto; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        input, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; font-size: 16px; }
+        button { background: var(--main-color); color: var(--dark-color); font-weight: bold; border: none; cursor: pointer; height: 50px; }
         button:disabled { background: #ccc; cursor: not-allowed; }
         
-        /* معاينة الصورة المختارة قبل الرفع */
         #preview-container { margin: 10px 0; display: none; }
         #image-preview { width: 150px; height: 150px; object-fit: cover; border-radius: 10px; border: 2px solid var(--main-color); }
 
-        /* تصميم الهوية النهائي */
-        .id-card { display: none; width: 340px; margin: 20px auto; background: white; border-radius: 12px; border: 2px solid var(--dark-color); overflow: hidden; box-shadow: 0 8px 25px rgba(0,0,0,0.2); }
-        .card-header { background: var(--dark-color); color: var(--main-color); padding: 12px; font-weight: bold; font-size: 18px; }
-        .card-body { padding: 15px; display: flex; align-items: center; text-align: right; }
-        .user-photo { width: 90px; height: 90px; border-radius: 8px; border: 2px solid var(--main-color); object-fit: cover; margin-left: 15px; }
+        .id-card { display: none; width: 340px; margin: 20px auto; background: white; border-radius: 12px; border: 2px solid var(--dark-color); overflow: hidden; box-shadow: 0 8px 25px rgba(0,0,0,0.2); text-align: right; }
+        .card-header { background: var(--dark-color); color: var(--main-color); padding: 12px; font-weight: bold; font-size: 18px; text-align: center; }
+        .card-body { padding: 15px; display: flex; align-items: center; }
+        .user-photo { width: 95px; height: 95px; border-radius: 8px; border: 2px solid var(--main-color); object-fit: cover; margin-left: 15px; }
         .info { flex: 1; }
         .info div { margin-bottom: 5px; font-size: 13px; }
-        .qr-img { width: 60px; height: 60px; margin-top: 5px; }
+        .qr-img { width: 65px; height: 65px; margin-top: 5px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>تسجيل مشترك جديد</h2>
-    <input type="text" id="userName" placeholder="اسم المشترك">
+    <h2>تسجيل عضوية جديدة</h2>
+    <input type="text" id="userName" placeholder="اسم المشترك الرباعي">
     <input type="file" id="upload" accept="image/*">
-    
     <div id="preview-container">
-        <p style="font-size: 12px; color: #666;">معاينة الصورة:</p>
         <img id="image-preview" src="">
     </div>
-    
-    <button id="submitBtn">إصدار الهوية فوراً</button>
+    <button id="submitBtn">إصدار الهوية الآن</button>
 </div>
 
 <div id="id-card-result" class="id-card">
-    <div class="card-header">JOY GYM - بطاقة عضوية</div>
+    <div class="card-header">JOY GYM - MEMBER CARD</div>
     <div class="card-body">
         <img id="display-image" class="user-photo" src="">
         <div class="info">
             <div style="font-weight: bold; font-size: 16px;" id="display-name"></div>
-            <div>رقم الاشتراك: <span id="display-id" style="color: red; font-weight: bold;"></span></div>
+            <div>رقم العضوية: <span id="display-id" style="color: #d32f2f; font-weight: bold;"></span></div>
             <div>تاريخ الإصدار: <span id="display-date"></span></div>
             <img id="display-qr" class="qr-img" src="">
         </div>
     </div>
 </div>
 
-<script src="hhttps://script.google.com/macros/s/AKfycbx7zxuBx8uNovjMRTDGYFlkDbDar4zga8WGilaVR98aJXJboCEvCdt1QoTqg9j2s6Iyuw/exec"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
 <script>
-    // ⚠️ استبدل الرابط أدناه برابط السكربت (Exec URL) الجديد
-    const scriptURL = 'رابط_السكربت_الخاص_بك_هنا';
-    let base64Image = "";
+    const imgbbAPIKey = '0f94a6d29c6114df4a73fed43c4de16c'; 
+    const googleScriptURL = 'https://script.google.com/macros/s/AKfycbxC2q1kr7zvmba6LFimgOJZqprijO4XV2pN4QL-vW-IYmKgZK-Dai19pg2Z-bBp3TAMng/exec';
+    let base64Data = "";
 
-    // عرض معاينة الصورة فور اختيارها
     $('#upload').on('change', function() {
         const file = this.files[0];
         if (file) {
@@ -69,43 +63,55 @@
             reader.onload = function(e) {
                 $('#image-preview').attr('src', e.target.result);
                 $('#preview-container').show();
-                base64Image = e.target.result; // حفظ الصورة لتحميلها
+                base64Data = e.target.result.split(',')[1]; 
             }
             reader.readAsDataURL(file);
         }
     });
 
-    $('#submitBtn').on('click', function() {
+    $('#submitBtn').on('click', async function() {
         const name = $('#userName').val();
-        if(!name || !base64Image) return alert("يرجى إدخال الاسم واختيار صورة!");
+        if(!name || !base64Data) return alert("يرجى إكمال البيانات أولاً");
 
         const btn = $(this);
-        btn.prop('disabled', true).text('جاري الرفع للحساب...');
+        btn.prop('disabled', true).text('جاري رفع الصورة...');
 
-        fetch(scriptURL, {
-            method: 'POST',
-            body: JSON.stringify({ name: name, image: base64Image })
-        })
-        .then(res => res.json())
-        .then(result => {
+        try {
+            // 1. الرفع لـ ImgBB
+            const formData = new FormData();
+            formData.append('image', base64Data);
+            
+            const imgbbRes = await fetch(`https://api.imgbb.com/1/upload?key=${imgbbAPIKey}`, {
+                method: 'POST',
+                body: formData
+            });
+            const imgData = await imgbbRes.json();
+            const directUrl = imgData.data.url;
+
+            btn.text('جاري حفظ البيانات...');
+
+            // 2. الإرسال لجوجل
+            const googleRes = await fetch(googleScriptURL, {
+                method: 'POST',
+                body: JSON.stringify({ name: name, image: directUrl })
+            });
+            const result = await googleRes.json();
+
             if(result.result === "success") {
                 $('#display-name').text(result.name);
                 $('#display-id').text(result.id);
                 $('#display-date').text(result.date);
-                $('#display-image').attr('src', result.imageUrl);
+                $('#display-image').attr('src', directUrl);
                 $('#display-qr').attr('src', result.qrUrl);
-                
                 $('#id-card-result').fadeIn();
-                btn.prop('disabled', false).text('إصدار هوية أخرى');
-                alert("تم تسجيل المشترك بنجاح!");
+                alert("تم بنجاح!");
             }
-        })
-        .catch(err => {
-            alert("حدث خطأ في الاتصال. تأكد من إعدادات جوجل سكربت.");
-            btn.prop('disabled', false).text('إعادة المحاولة');
-        });
+        } catch (err) {
+            alert("حدث خطأ، يرجى المحاولة مرة أخرى.");
+        } finally {
+            btn.prop('disabled', false).text('إصدار هوية أخرى');
+        }
     });
 </script>
-
 </body>
 </html>

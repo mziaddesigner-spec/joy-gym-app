@@ -13,21 +13,28 @@
         button:disabled { background: #ccc; cursor: not-allowed; }
         
         #preview-container { margin: 10px 0; display: none; }
-        #image-preview { width: 150px; height: 150px; object-fit: cover; border-radius: 10px; border: 2px solid var(--main-color); }
+        #image-preview { width: 140px; height: 140px; object-fit: cover; border-radius: 10px; border: 2px solid var(--main-color); }
 
+        /* تصميم الهوية */
         .id-card { display: none; width: 340px; margin: 20px auto; background: white; border-radius: 12px; border: 2px solid var(--dark-color); overflow: hidden; box-shadow: 0 8px 25px rgba(0,0,0,0.2); text-align: right; }
         .card-header { background: var(--dark-color); color: var(--main-color); padding: 12px; font-weight: bold; font-size: 18px; text-align: center; }
         .card-body { padding: 15px; display: flex; align-items: center; }
         .user-photo { width: 95px; height: 95px; border-radius: 8px; border: 2px solid var(--main-color); object-fit: cover; margin-left: 15px; }
         .info { flex: 1; }
-        .info div { margin-bottom: 5px; font-size: 13px; }
-        .qr-img { width: 65px; height: 65px; margin-top: 5px; }
+        .info div { margin-bottom: 4px; font-size: 13px; color: #333; }
+        
+        /* شارة حالة الاشتراك */
+        .status-badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold; margin-top: 5px; }
+        .active { background-color: #e8f5e9; color: #2e7d32; border: 1px solid #2e7d32; }
+        .expired { background-color: #ffebee; color: #c62828; border: 1px solid #c62828; }
+        
+        .qr-img { width: 60px; height: 60px; margin-top: 5px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>تسجيل عضوية جديدة</h2>
+    <h2>تسجيل عضوية Joy Gym</h2>
     <input type="text" id="userName" placeholder="اسم المشترك الرباعي">
     <input type="file" id="upload" accept="image/*">
     <div id="preview-container">
@@ -43,7 +50,9 @@
         <div class="info">
             <div style="font-weight: bold; font-size: 16px;" id="display-name"></div>
             <div>رقم العضوية: <span id="display-id" style="color: #d32f2f; font-weight: bold;"></span></div>
-            <div>تاريخ الإصدار: <span id="display-date"></span></div>
+            <div>تاريخ الانتهاء: <span id="display-expiry" style="font-weight: bold;"></span></div>
+            <div id="status-label" class="status-badge"></div>
+            <br>
             <img id="display-qr" class="qr-img" src="">
         </div>
     </div>
@@ -53,7 +62,7 @@
 
 <script>
     const imgbbAPIKey = '0f94a6d29c6114df4a73fed43c4de16c'; 
-    const googleScriptURL = 'https://script.google.com/macros/s/AKfycbxC2q1kr7zvmba6LFimgOJZqprijO4XV2pN4QL-vW-IYmKgZK-Dai19pg2Z-bBp3TAMng/exec';
+    const googleScriptURL = 'https://script.google.com/macros/s/AKfycby3DImh0cJcolomrVmBJuajxGLcJU6uqItAo9FCDQ4ufFFO4cPmKxdHxUiHInAVFjlHvg/exec';
     let base64Data = "";
 
     $('#upload').on('change', function() {
@@ -71,26 +80,20 @@
 
     $('#submitBtn').on('click', async function() {
         const name = $('#userName').val();
-        if(!name || !base64Data) return alert("يرجى إكمال البيانات أولاً");
+        if(!name || !base64Data) return alert("يرجى إدخال الاسم واختيار الصورة");
 
         const btn = $(this);
-        btn.prop('disabled', true).text('جاري رفع الصورة...');
+        btn.prop('disabled', true).text('جاري المعالجة...');
 
         try {
-            // 1. الرفع لـ ImgBB
+            // 1. الرفع إلى ImgBB
             const formData = new FormData();
             formData.append('image', base64Data);
-            
-            const imgbbRes = await fetch(`https://api.imgbb.com/1/upload?key=${imgbbAPIKey}`, {
-                method: 'POST',
-                body: formData
-            });
+            const imgbbRes = await fetch(`https://api.imgbb.com/1/upload?key=${imgbbAPIKey}`, { method: 'POST', body: formData });
             const imgData = await imgbbRes.json();
             const directUrl = imgData.data.url;
 
-            btn.text('جاري حفظ البيانات...');
-
-            // 2. الإرسال لجوجل
+            // 2. الإرسال لجوجل سكربت
             const googleRes = await fetch(googleScriptURL, {
                 method: 'POST',
                 body: JSON.stringify({ name: name, image: directUrl })
@@ -98,16 +101,27 @@
             const result = await googleRes.json();
 
             if(result.result === "success") {
+                const expiry = new Date(result.expiryDate);
+                const now = new Date();
+                
                 $('#display-name').text(result.name);
                 $('#display-id').text(result.id);
-                $('#display-date').text(result.date);
+                $('#display-expiry').text(expiry.toLocaleDateString('ar-SA'));
+                
+                // تحديد الحالة لونياً
+                if (now <= expiry) {
+                    $('#status-label').text('الاشتراك فعال').removeClass('expired').addClass('active');
+                } else {
+                    $('#status-label').text('الاشتراك منتهي').removeClass('active').addClass('expired');
+                }
+
                 $('#display-image').attr('src', directUrl);
                 $('#display-qr').attr('src', result.qrUrl);
                 $('#id-card-result').fadeIn();
-                alert("تم بنجاح!");
+                alert("تم إصدار الهوية بنجاح!");
             }
         } catch (err) {
-            alert("حدث خطأ، يرجى المحاولة مرة أخرى.");
+            alert("حدث خطأ، يرجى التأكد من اتصال الإنترنت أو إعدادات السكربت");
         } finally {
             btn.prop('disabled', false).text('إصدار هوية أخرى');
         }
